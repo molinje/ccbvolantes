@@ -1,0 +1,116 @@
+{
+  "_version": "1.86.0",
+  "sap.app": {
+    "id": "certificados.ccb.org.ccbcertvolantes",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.31.1",
+      "toolsId": "638a9fbb-b0dc-4004-ba84-1eb59ff98d9d"
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ccbvolantessemobj-show": {
+          "semanticObject": "ccbvolantessemobj",
+          "action": "show",
+          "title": "{{ccbvolantessemobj-show.flpTitle}}",
+          "subTitle": "{{ccbvolantessemobj-show.flpSubtitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.150.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "certificados.ccb.org.ccbcertvolantes.i18n.i18n"
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "certificados.ccb.org.ccbcertvolantes.view",
+        "async": true,
+        "viewPath": "certificados.ccb.org.ccbcertvolantes.view"
+      },
+      "routes": [
+        {
+          "name": "RouteViewini",
+          "pattern": ":?query:",
+          "target": [
+            "TargetViewini"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetViewini": {
+          "id": "Viewini",
+          "name": "Viewini"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "certificados.ccb.org.ccbcertvolantes.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "certificadosccborgccbcertvolantes"
+  }
+}

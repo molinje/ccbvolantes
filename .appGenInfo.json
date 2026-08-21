@@ -1,0 +1,23 @@
+{
+  "generationParameters": {
+    "generationDate": "Fri Aug 21 2026 23:02:04 GMT+0000 (Coordinated Universal Time)",
+    "generatorPlatform": "SAP Business Application Studio",
+    "serviceType": "None",
+    "metadataFilename": "",
+    "serviceUrl": "N/A",
+    "appName": "ccbcertvolantes",
+    "appTitle": "Volantes de Pago",
+    "appDescription": "An SAP Fiori application.",
+    "appNamespace": "certificados.ccb.org",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.150.1",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": false,
+    "generatorVersion": "1.31.1",
+    "template": "Basic",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}
