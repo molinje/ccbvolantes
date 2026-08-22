@@ -8,6 +8,8 @@ sap.ui.define([
         // Servicio OData V2 ZHCM_CERTIFICADOS_PERSONAL_WD_SRV, expuesto a través
         // del destination "DestToSAP_QAS" (ruta mapeada en xs-app.json / ui5.yaml)
         _datosBasicosUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/DatosBasicosCertLabSet",
+        _anioVolanteUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/AnioVolanteSet",
+        _volantesBinUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/VolantesBinSet",
 
         /**
          * Retorna la URL base de la app, respetando el subpath con el que fue
@@ -30,6 +32,43 @@ sap.ui.define([
             var sUrl = this._getAppBase() + this._datosBasicosUrl + "('" + sId + "')";
 
             return this._executeGet(sUrl, { "$format": "json" });
+        },
+
+        /**
+         * Consulta la colección de años disponibles para los volantes de pago
+         * GET AnioVolanteSet?$format=json
+         * @returns {Promise<Array>} Promise que resuelve con un array de { Anio, DescAnio }
+         */
+        getYears: function () {
+            var sUrl = this._getAppBase() + this._anioVolanteUrl;
+
+            return this._executeGet(sUrl, { "$format": "json" })
+                .then(function (oData) {
+                    var aResults = (oData && oData.d && oData.d.results) || [];
+                    return aResults.map(function (oItem) {
+                        return {
+                            Anio: oItem.Anio,
+                            DescAnio: oItem.DescAnio
+                        };
+                    });
+                });
+        },
+
+        /**
+         * Arma la URL del volante de pago (binario/PDF), lista para abrir en una
+         * nueva pestaña (window.open) o usar como href de descarga.
+         * GET VolantesBinSet(Pernr='..',Periodo='..',Anio='..',PayOcsrn='..',Area_Nom='..')/$value
+         * @param {object} oParams - { Pernr, Periodo, Anio, PayOcsrn, Area_Nom }
+         * @returns {string} URL absoluta del volante
+         */
+        getVolanteUrl: function (oParams) {
+            var sKeys = "Pernr='" + oParams.Pernr + "'," +
+                "Periodo='" + oParams.Periodo + "'," +
+                "Anio='" + oParams.Anio + "'," +
+                "PayOcsrn='" + oParams.PayOcsrn + "'," +
+                "Area_Nom='" + oParams.Area_Nom + "'";
+
+            return this._getAppBase() + this._volantesBinUrl + "(" + sKeys + ")/$value";
         },
 
         /**
