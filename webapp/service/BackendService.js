@@ -26,7 +26,7 @@ sap.ui.define([
          * @returns {Promise} Promise que resuelve con el JSON de respuesta del servicio OData
          */
         GetDataEmployee: function (sEmail) {
-            var sId = String(sEmail || "").trim();
+            var sId = String(sEmail || "").trim().toUpperCase();
             var sUrl = this._getAppBase() + this._datosBasicosUrl + "('" + sId + "')";
 
             return this._executeGet(sUrl, { "$format": "json" });
