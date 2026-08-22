@@ -15,13 +15,13 @@
                 <core:Title text="Datos del Empleado" />
 
                 <Label text="Número de Empleado" />
-                <Input id="inpPernr" value="{globalData>/userData/Pernr}" editable="false" />
+                <Input id="inpPernr" value="{globalData>/userData/d/Pernr}" editable="false" />
 
                 <Label text="Nombre" />
-                <Input id="inpNombre" value="{globalData>/userData/Nombre}" editable="false" />
+                <Input id="inpNombre" value="{globalData>/userData/d/Nombre}" editable="false" />
 
                 <Label text="Área de Nómina" />
-                <Input id="inpAreaNom" value="{globalData>/userData/Area_Nom}" editable="false" />
+                <Input id="inpAreaNom" value="{globalData>/userData/d/Area_Nom}" editable="false" />
 
                 <core:Title text="Parámetros del Volante" />
 
