@@ -81,7 +81,7 @@ resources:
   parameters:
     config:
       tenant-mode: dedicated
-      xsappname: certificadosccborgccbcertvolantes-${org-id}-${space-id}
+      xsappname: certificadosccborgccbcertvolantes
     path: ./xs-security.json
     service: xsuaa
     service-name: certificadosccborgccbcertvolantes-xsuaa-service
