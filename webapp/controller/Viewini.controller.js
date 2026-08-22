@@ -49,8 +49,8 @@ sap.ui.define([
             var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
             var oViewiniModel = this.getView().getModel("viewiniView");
 
-            var sPernr = oGlobalDataModel.getProperty("/userData/Pernr");
-            var sAreaNom = oGlobalDataModel.getProperty("/userData/Area_Nom");
+            var sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
+            var sAreaNom = oGlobalDataModel.getProperty("/userData/d/Area_Nom");
 
             var sPeriodo = oViewiniModel.getProperty("/periodo");
             var sAnio = oViewiniModel.getProperty("/anio");
