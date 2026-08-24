@@ -25,8 +25,8 @@
 
                 <core:Title text="Parámetros del Volante" />
 
-                <Label text="Periodo" />
-                <Select id="selPeriodo" selectedKey="{viewiniView>/periodo}">
+                <Label text="Periodo" required="true" />
+                <Select id="selPeriodo" selectedKey="{viewiniView>/periodo}" required="true" forceSelection="false" change="onPeriodoAnioChange">
                     <core:Item key="01" text="01" />
                     <core:Item key="02" text="02" />
                     <core:Item key="03" text="03" />
@@ -41,15 +41,14 @@
                     <core:Item key="12" text="12" />
                 </Select>
 
-                <Label text="Año" />
-                <Select id="selAnio" selectedKey="{viewiniView>/anio}" items="{globalData>/aniosVolante}">
+                <Label text="Año" required="true" />
+                <Select id="selAnio" selectedKey="{viewiniView>/anio}" items="{globalData>/aniosVolante}" required="true" forceSelection="false" change="onPeriodoAnioChange">
                     <core:Item key="{globalData>Anio}" text="{globalData>DescAnio}" />
                 </Select>
 
-                <Label text="Tipo Pago" />
-                <Select id="selTipoPago" selectedKey="{viewiniView>/tipoPago}">
-                    <core:Item key="NOMI" text="Nómina Mensual" />
-                    <core:Item key="PRMA" text="Nómina Especial" />
+                <Label text="Tipo Pago" required="true" />
+                <Select id="selTipoPago" selectedKey="{viewiniView>/tipoPago}" items="{viewiniView>/tiposPago}" required="true" forceSelection="false" enabled="{= ${viewiniView>/tiposPago}.length > 0 }">
+                    <core:Item key="{viewiniView>PayOcrsn}" text="{viewiniView>Descripcion}" />
                 </Select>
             </form:SimpleForm>
         </content>

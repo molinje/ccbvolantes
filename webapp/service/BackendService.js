@@ -10,6 +10,7 @@ sap.ui.define([
         _datosBasicosUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/DatosBasicosCertLabSet",
         _anioVolanteUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/AnioVolanteSet",
         _volantesBinUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/VolantesBinSet",
+        _nominaEspecialUrl: "/sap/opu/odata/sap/ZHCM_CERTIFICADOS_PERSONAL_WD_SRV/NominaEspecialSet",
 
         /**
          * Retorna la URL base de la app, respetando el subpath con el que fue
@@ -69,6 +70,34 @@ sap.ui.define([
                 "Area_Nom='" + oParams.Area_Nom + "'";
 
             return this._getAppBase() + this._volantesBinUrl + "(" + sKeys + ")/$value";
+        },
+
+        /**
+         * Consulta los tipos de pago (nómina especial) disponibles para un empleado,
+         * en un Año y Periodo específicos.
+         * GET NominaEspecialSet?$filter=Pernr eq '..' and Anio eq '..' and Periodo eq '..'&$format=json
+         * @param {object} oParams - { Pernr, Anio, Periodo }
+         * @returns {Promise<Array<{PayOcrsn: string, Descripcion: string}>>} Promise que resuelve con
+         * una colección plana que contiene únicamente los campos PayOcrsn y Descripcion
+         */
+        getTiposPago: function (oParams) {
+            var sPernr = String((oParams && oParams.Pernr) || "").trim();
+            var sAnio = String((oParams && oParams.Anio) || "").trim();
+            var sPeriodo = String((oParams && oParams.Periodo) || "").trim();
+
+            var sUrl = this._getAppBase() + this._nominaEspecialUrl;
+            var sFilter = "Pernr eq '" + sPernr + "' and Anio eq '" + sAnio + "' and Periodo eq '" + sPeriodo + "'";
+
+            return this._executeGet(sUrl, { "$filter": sFilter, "$format": "json" })
+                .then(function (oData) {
+                    var aResults = (oData && oData.d && oData.d.results) || [];
+                    return aResults.map(function (oItem) {
+                        return {
+                            PayOcrsn: oItem.PayOcrsn,
+                            Descripcion: oItem.Descripcion
+                        };
+                    });
+                });
         },
 
         /**

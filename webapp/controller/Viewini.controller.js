@@ -11,14 +11,13 @@ sap.ui.define([
         onInit() {
             this._oBackendService = new BackendService();
 
-            // Modelo local del formulario (selección de Periodo / Año / Tipo Pago)
-            var oToday = new Date();
-            var sMesActual = String(oToday.getMonth() + 1).padStart(2, "0");
-
+            // Modelo local del formulario (selección de Periodo / Año / Tipo Pago).
+            // Ninguno de los tres campos debe tener valor preseleccionado al cargar.
             var oViewiniModel = new JSONModel({
-                periodo: sMesActual,
+                periodo: "",
                 anio: "",
-                tipoPago: "NOMI"
+                tipoPago: "",
+                tiposPago: []
             });
             this.getView().setModel(oViewiniModel, "viewiniView");
 
@@ -42,6 +41,54 @@ sap.ui.define([
         },
 
         /**
+         * Maneja el evento "change" de los Select de Periodo y Año. Cuando ambos
+         * tienen valor, calcula el listado de opciones del Select de Tipo Pago
+         * (NominaEspecialSet); mientras falte alguno, deja ese listado vacío y
+         * limpia la selección de Tipo Pago.
+         */
+        onPeriodoAnioChange() {
+            var oViewiniModel = this.getView().getModel("viewiniView");
+
+            var sPeriodo = oViewiniModel.getProperty("/periodo");
+            var sAnio = oViewiniModel.getProperty("/anio");
+
+            // Cada vez que cambia Periodo o Año, la lista/selección previa de
+            // Tipo Pago queda obsoleta: se limpia siempre antes de recalcular.
+            oViewiniModel.setProperty("/tipoPago", "");
+            oViewiniModel.setProperty("/tiposPago", []);
+
+            var oSelTipoPago = this.byId("selTipoPago");
+            if (oSelTipoPago) {
+                oSelTipoPago.setValueState("None");
+            }
+
+            if (!sPeriodo || !sAnio) {
+                return;
+            }
+
+            var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
+            var sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
+
+            if (!sPernr) {
+                console.warn("No se encontró el número de empleado en globalData>/userData/d/Pernr");
+                return;
+            }
+
+            this._oBackendService.getTiposPago({
+                Pernr: sPernr,
+                Anio: sAnio,
+                Periodo: sPeriodo
+            })
+                .then(function (aTiposPago) {
+                    oViewiniModel.setProperty("/tiposPago", aTiposPago);
+                })
+                .catch(function (oError) {
+                    console.error("Error al consultar los tipos de pago (NominaEspecialSet):", oError);
+                    MessageBox.error("No fue posible consultar los tipos de pago disponibles para el Periodo y Año seleccionados.");
+                });
+        },
+
+        /**
          * Genera (abre/descarga) el volante de pago del empleado para el
          * Periodo / Año / Tipo de Pago seleccionados en el formulario.
          */
@@ -52,17 +99,47 @@ sap.ui.define([
             var sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
             var sAreaNom = oGlobalDataModel.getProperty("/userData/d/Area_Nom");
 
-            var sPeriodo = oViewiniModel.getProperty("/periodo");
-            var sAnio = oViewiniModel.getProperty("/anio");
-            var sTipoPago = oViewiniModel.getProperty("/tipoPago");
-
             if (!sPernr || !sAreaNom) {
                 MessageBox.error("No se han cargado los datos del empleado. Intente recargar la aplicación.");
                 return;
             }
 
-            if (!sPeriodo || !sAnio || !sTipoPago) {
-                MessageBox.warning("Seleccione Periodo, Año y Tipo de Pago antes de generar el volante.");
+            var sPeriodo = oViewiniModel.getProperty("/periodo");
+            var sAnio = oViewiniModel.getProperty("/anio");
+            var sTipoPago = oViewiniModel.getProperty("/tipoPago");
+
+            var oSelPeriodo = this.byId("selPeriodo");
+            var oSelAnio = this.byId("selAnio");
+            var oSelTipoPago = this.byId("selTipoPago");
+
+            var aMissing = [];
+
+            if (!sPeriodo) {
+                aMissing.push("Periodo");
+                oSelPeriodo.setValueState("Error");
+                oSelPeriodo.setValueStateText("Seleccione un Periodo.");
+            } else {
+                oSelPeriodo.setValueState("None");
+            }
+
+            if (!sAnio) {
+                aMissing.push("Año");
+                oSelAnio.setValueState("Error");
+                oSelAnio.setValueStateText("Seleccione un Año.");
+            } else {
+                oSelAnio.setValueState("None");
+            }
+
+            if (!sTipoPago) {
+                aMissing.push("Tipo Pago");
+                oSelTipoPago.setValueState("Error");
+                oSelTipoPago.setValueStateText("Seleccione un Tipo de Pago.");
+            } else {
+                oSelTipoPago.setValueState("None");
+            }
+
+            if (aMissing.length > 0) {
+                MessageBox.warning("Debe seleccionar un valor para: " + aMissing.join(", ") + ".");
                 return;
             }
 
