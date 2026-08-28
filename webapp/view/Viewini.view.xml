@@ -23,6 +23,15 @@
                 <Label text="Área de Nómina" />
                 <Input id="inpAreaNom" value="{globalData>/userData/d/Area_Nom}" editable="false" />
 
+                <Label text="Otro Numero de personal" />
+                <Input id="inpOtroPernr"
+                    value="{viewiniView>/otroPernr}"
+                    type="Number"
+                    maxLength="8"
+                    liveChange="onOtroPernrLiveChange"
+                    visible="{= ${globalData>/userData/d/TienePermiso} === true }"
+                    editable="{= ${globalData>/userData/d/TienePermiso} === true }" />
+
                 <core:Title text="Parámetros del Volante" />
 
                 <Label text="Periodo" required="true" />

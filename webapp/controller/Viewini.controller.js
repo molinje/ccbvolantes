@@ -17,7 +17,8 @@ sap.ui.define([
                 periodo: "",
                 anio: "",
                 tipoPago: "",
-                tiposPago: []
+                tiposPago: [],
+                otroPernr: ""
             });
             this.getView().setModel(oViewiniModel, "viewiniView");
 
@@ -89,6 +90,22 @@ sap.ui.define([
         },
 
         /**
+         * Maneja el evento "liveChange" del campo "Otro Numero de personal":
+         * solo permite dígitos y limita la longitud a 8 posiciones.
+         */
+        onOtroPernrLiveChange(oEvent) {
+            var oInput = oEvent.getSource();
+            var sValue = oEvent.getParameter("value") || "";
+            var sSanitized = sValue.replace(/[^0-9]/g, "").slice(0, 8);
+
+            if (sSanitized !== sValue) {
+                oInput.setValue(sSanitized);
+            }
+
+            this.getView().getModel("viewiniView").setProperty("/otroPernr", sSanitized);
+        },
+
+        /**
          * Genera (abre/descarga) el volante de pago del empleado para el
          * Periodo / Año / Tipo de Pago seleccionados en el formulario.
          */
@@ -96,8 +113,22 @@ sap.ui.define([
             var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
             var oViewiniModel = this.getView().getModel("viewiniView");
 
-            var sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
             var sAreaNom = oGlobalDataModel.getProperty("/userData/d/Area_Nom");
+
+            // Determina el número de personal a utilizar: si el usuario tiene
+            // permiso (globalData>/userData/d/TienePermiso = true) y diligenció
+            // un valor numérico > 0 en "Otro Numero de personal", se usa ese valor;
+            // de lo contrario se usa el Pernr del empleado logueado.
+            var bTienePermiso = oGlobalDataModel.getProperty("/userData/d/TienePermiso") === true;
+            var sOtroPernr = oViewiniModel.getProperty("/otroPernr");
+            var nOtroPernr = parseInt(sOtroPernr, 10);
+
+            var sPernr;
+            if (bTienePermiso && sOtroPernr && nOtroPernr > 0) {
+                sPernr = sOtroPernr;
+            } else {
+                sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
+            }
 
             if (!sPernr || !sAreaNom) {
                 MessageBox.error("No se han cargado los datos del empleado. Intente recargar la aplicación.");
