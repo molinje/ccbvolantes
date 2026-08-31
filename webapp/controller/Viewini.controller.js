@@ -42,19 +42,41 @@ sap.ui.define([
         },
 
         /**
-         * Maneja el evento "change" de los Select de Periodo y Año. Cuando ambos
-         * tienen valor, calcula el listado de opciones del Select de Tipo Pago
-         * (NominaEspecialSet); mientras falte alguno, deja ese listado vacío y
-         * limpia la selección de Tipo Pago.
+         * Determina el número de personal a utilizar para las consultas: si el
+         * usuario tiene permiso (globalData>/userData/d/TienePermiso = true) y
+         * diligenció un valor numérico > 0 en "Otro Numero de personal", se usa
+         * ese valor; de lo contrario se usa el Pernr del empleado logueado.
          */
-        onPeriodoAnioChange() {
+        _getPernrConsulta() {
+            var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
+            var oViewiniModel = this.getView().getModel("viewiniView");
+
+            var bTienePermiso = oGlobalDataModel.getProperty("/userData/d/TienePermiso") === true;
+            var sOtroPernr = oViewiniModel.getProperty("/otroPernr");
+            var nOtroPernr = parseInt(sOtroPernr, 10);
+
+            if (bTienePermiso && sOtroPernr && nOtroPernr > 0) {
+                return sOtroPernr;
+            }
+
+            return oGlobalDataModel.getProperty("/userData/d/Pernr");
+        },
+
+        /**
+         * Recalcula el listado de opciones del Select de Tipo Pago
+         * (NominaEspecialSet) para el Periodo, Año y número de personal
+         * actuales (ver _getPernrConsulta). Mientras falte Periodo o Año,
+         * deja ese listado vacío y limpia la selección de Tipo Pago.
+         */
+        _recalcularTiposPago() {
             var oViewiniModel = this.getView().getModel("viewiniView");
 
             var sPeriodo = oViewiniModel.getProperty("/periodo");
             var sAnio = oViewiniModel.getProperty("/anio");
 
-            // Cada vez que cambia Periodo o Año, la lista/selección previa de
-            // Tipo Pago queda obsoleta: se limpia siempre antes de recalcular.
+            // Cada vez que cambia Periodo, Año u Otro Numero de personal, la
+            // lista/selección previa de Tipo Pago queda obsoleta: se limpia
+            // siempre antes de recalcular.
             oViewiniModel.setProperty("/tipoPago", "");
             oViewiniModel.setProperty("/tiposPago", []);
 
@@ -67,11 +89,10 @@ sap.ui.define([
                 return;
             }
 
-            var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
-            var sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
+            var sPernr = this._getPernrConsulta();
 
             if (!sPernr) {
-                console.warn("No se encontró el número de empleado en globalData>/userData/d/Pernr");
+                console.warn("No se encontró el número de empleado a utilizar para la consulta de tipos de pago");
                 return;
             }
 
@@ -87,6 +108,13 @@ sap.ui.define([
                     console.error("Error al consultar los tipos de pago (NominaEspecialSet):", oError);
                     MessageBox.error("No fue posible consultar los tipos de pago disponibles para el Periodo y Año seleccionados.");
                 });
+        },
+
+        /**
+         * Maneja el evento "change" de los Select de Periodo y Año.
+         */
+        onPeriodoAnioChange() {
+            this._recalcularTiposPago();
         },
 
         /**
@@ -106,6 +134,16 @@ sap.ui.define([
         },
 
         /**
+         * Maneja el evento "change" del campo "Otro Numero de personal" (se
+         * dispara al perder el foco o pulsar Enter). Si ya hay Periodo y Año
+         * seleccionados, recalcula el Select de Tipo Pago usando el número de
+         * personal diligenciado (o el del empleado logueado si se dejó vacío).
+         */
+        onOtroPernrChange() {
+            this._recalcularTiposPago();
+        },
+
+        /**
          * Genera (abre/descarga) el volante de pago del empleado para el
          * Periodo / Año / Tipo de Pago seleccionados en el formulario.
          */
@@ -114,21 +152,7 @@ sap.ui.define([
             var oViewiniModel = this.getView().getModel("viewiniView");
 
             var sAreaNom = oGlobalDataModel.getProperty("/userData/d/Area_Nom");
-
-            // Determina el número de personal a utilizar: si el usuario tiene
-            // permiso (globalData>/userData/d/TienePermiso = true) y diligenció
-            // un valor numérico > 0 en "Otro Numero de personal", se usa ese valor;
-            // de lo contrario se usa el Pernr del empleado logueado.
-            var bTienePermiso = oGlobalDataModel.getProperty("/userData/d/TienePermiso") === true;
-            var sOtroPernr = oViewiniModel.getProperty("/otroPernr");
-            var nOtroPernr = parseInt(sOtroPernr, 10);
-
-            var sPernr;
-            if (bTienePermiso && sOtroPernr && nOtroPernr > 0) {
-                sPernr = sOtroPernr;
-            } else {
-                sPernr = oGlobalDataModel.getProperty("/userData/d/Pernr");
-            }
+            var sPernr = this._getPernrConsulta();
 
             if (!sPernr || !sAreaNom) {
                 MessageBox.error("No se han cargado los datos del empleado. Intente recargar la aplicación.");
