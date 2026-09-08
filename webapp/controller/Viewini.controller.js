@@ -22,23 +22,51 @@ sap.ui.define([
             });
             this.getView().setModel(oViewiniModel, "viewiniView");
 
-            // Datos del empleado logueado (correo) desde el modelo global
             var oGlobalDataModel = this.getOwnerComponent().getModel("globalData");
-            var sEmail = oGlobalDataModel.getProperty("/userLogin/email");
+            var that = this;
 
-            if (!sEmail) {
-                console.warn("No se encontró el correo del usuario logueado en globalData>/userLogin/email");
-                return;
-            }
+            // --- Código original (lectura síncrona del correo ya resuelto por Work Zone) -----------
+            // Se deja comentado como referencia. Ya no sirve tal cual porque, cuando la app corre
+            // detrás del App Router standalone (sin Work Zone), el correo del usuario logueado se
+            // obtiene de forma ASÍNCRONA (ver Component.js: _getLoggedUserData /
+            // _getCurrentUserFromApprouter) y todavía no está disponible en este punto del onInit.
+            //
+            // var sEmail = oGlobalDataModel.getProperty("/userLogin/email");
+            // if (!sEmail) {
+            //     console.warn("No se encontró el correo del usuario logueado en globalData>/userLogin/email");
+            //     return;
+            // }
+            // this._oBackendService.GetDataEmployee(sEmail)
+            //     .then(function (oResponse) {
+            //         console.log("Datos básicos / certificado laboral del empleado:", oResponse);
+            //         oGlobalDataModel.setProperty("/userData", oResponse);
+            //     })
+            //     .catch(function (oError) {
+            //         console.error("Error al consultar DatosBasicosCertLabSet:", oError);
+            //     });
+            // -----------------------------------------------------------------------------------------
 
-            this._oBackendService.GetDataEmployee(sEmail)
-                .then(function (oResponse) {
-                    console.log("Datos básicos / certificado laboral del empleado:", oResponse);
-                    oGlobalDataModel.setProperty("/userData", oResponse);
-                })
-                .catch(function (oError) {
-                    console.error("Error al consultar DatosBasicosCertLabSet:", oError);
-                });
+            // NUEVO: espera a que el Component resuelva el usuario logueado (Work Zone o, si no
+            // hay Work Zone, App Router directo vía IAS) antes de consultar sus datos básicos —
+            // getUserDataPromise() ya funciona igual en ambos casos, resuelva rápido (Work Zone)
+            // o después de la llamada a /user-api/currentUser (App Router).
+            this.getOwnerComponent().getUserDataPromise().then(function (oUserData) {
+                var sEmail = oUserData && oUserData.email;
+
+                if (!sEmail) {
+                    console.warn("No se encontró el correo del usuario logueado en globalData>/userLogin/email");
+                    return;
+                }
+
+                return that._oBackendService.GetDataEmployee(sEmail)
+                    .then(function (oResponse) {
+                        console.log("Datos básicos / certificado laboral del empleado:", oResponse);
+                        oGlobalDataModel.setProperty("/userData", oResponse);
+                    })
+                    .catch(function (oError) {
+                        console.error("Error al consultar DatosBasicosCertLabSet:", oError);
+                    });
+            });
         },
 
         /**

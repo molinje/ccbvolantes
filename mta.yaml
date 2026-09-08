@@ -57,6 +57,20 @@ modules:
     - npm install
     - npm run build:cf
     supported-platforms: []
+- name: certificadosccborgccbcertvolantes-approuter
+  type: approuter.nodejs
+  path: approuter
+  parameters:
+    host: ccb-rrhh-volantes
+    disk-quota: 256M
+    memory: 256M
+  build-parameters:
+    ignore:
+    - node_modules/
+  requires:
+  - name: certificadosccborgccbcertvolantes-uaa
+  - name: certificadosccborgccbcertvolantes-html5-runtime
+  - name: certificadosccborgccbcertvolantes-destination-service
 resources:
 - name: certificadosccborgccbcertvolantes-destination-service
   type: org.cloudfoundry.managed-service
@@ -92,6 +106,12 @@ resources:
     service: html5-apps-repo
     service-name: certificadosccborgccbcertvolantes-html5-service
     service-plan: app-host
+- name: certificadosccborgccbcertvolantes-html5-runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: certificadosccborgccbcertvolantes-html5-runtime-service
+    service-plan: app-runtime
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
