@@ -226,15 +226,18 @@ sap.ui.define([
                 return;
             }
 
-            var sUrl = this._oBackendService.getVolanteUrl({
+            this._oBackendService.getVolantePago({
                 Pernr: sPernr,
                 Periodo: sPeriodo,
                 Anio: sAnio,
                 PayOcsrn: sTipoPago,
                 Area_Nom: sAreaNom
+            }).then((oBlob) => {
+                var sBlobUrl = URL.createObjectURL(oBlob);
+                window.open(sBlobUrl, "_blank");
+            }).catch((oError) => {
+                MessageBox.error(oError.message || "No fue posible generar el volante de pago.");
             });
-
-            window.open(sUrl, "_blank");
         }
     });
 });
